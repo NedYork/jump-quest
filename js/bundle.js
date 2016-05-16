@@ -93,14 +93,14 @@
 	  camera.follow(player, canvas.width/2, canvas.height/2);
 	
 	  var platforms = [new Game.Platform(300, room.height - 20),
-	                   new Game.Platform(450, room.height - 100),
-	                   new Game.Platform(600, room.height - 190),
-	                   new Game.Platform(750, room.height - 280),
-	                   new Game.Platform(900, room.height - 370),
-	                   new Game.Platform(750, room.height - 460),
-	                   new Game.Platform(600, room.height - 550),
-	                   new Game.Platform(450, room.height - 640),
-	                   new Game.Platform(300, room.height - 730),
+	                   new Game.Platform(470, room.height - 100),
+	                   new Game.Platform(640, room.height - 190),
+	                   new Game.Platform(810, room.height - 280),
+	                   new Game.Platform(960, room.height - 370),
+	                   new Game.Platform(810, room.height - 460),
+	                   new Game.Platform(660, room.height - 550),
+	                   new Game.Platform(510, room.height - 640),
+	                   new Game.Platform(360, room.height - 730),
 	
 	                 ];
 	
@@ -585,12 +585,16 @@
 	  this.y = y;
 	  this.width = 50;
 	  this.height = 50;
+	  // this.sprite = new Sprite('../spritesheet/spritesheet.png', )
 	}
 	
 	Platform.prototype.draw = function(context, xView, yView){
 	  context.save();
 	  context.fillStyle = "red";
-	  context.fillRect((this.x-this.width/2) - xView, (this.y-this.height/2) - yView, this.width, this.height);
+	  var platform = new Image();
+	  platform.src = './spritesheet/spritesheet.png';
+	  context.drawImage(platform, 340, 26, 25, 25, (this.x-this.width/2) - xView, (this.y-this.height/2) - yView, this.width, this.height);
+	  // context.fillRect((this.x-this.width/2) - xView, (this.y-this.height/2) - yView, this.width, this.height);
 	  context.restore();
 	};
 	
