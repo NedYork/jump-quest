@@ -1,5 +1,3 @@
-
-// wrapper for "class" Map
 function Map(width, height){
   // map dimensions
   this.width = width;
@@ -7,6 +5,7 @@ function Map(width, height){
 
   // map texture
   this.image = null;
+
 }
 
 // generate an example of a large map
@@ -15,23 +14,23 @@ Map.prototype.generate = function(){
   ctx.canvas.width = this.width;
   ctx.canvas.height = this.height;
 
-  var rows = ~~(this.width/44) + 1;
-  var columns = ~~(this.height/44) + 1;
-
-  var color = "red";
-  ctx.save();
-  ctx.fillStyle = "red";
-  for (var x = 0, i = 0; i < rows; x+=44, i++) {
-    ctx.beginPath();
-    for (var y = 0, j=0; j < columns; y+=44, j++) {
-      ctx.rect (x, y, 40, 40);
-    }
-    color = (color == "red" ? "blue" : "red");
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.closePath();
-  }
-  ctx.restore();
+  // var rows = ~~(this.width/44) + 1;
+  // var columns = ~~(this.height/44) + 1;
+  //
+  // var color = "red";
+  // ctx.save();
+  // ctx.fillStyle = "red";
+  // for (var x = 0, i = 0; i < rows; x+=44, i++) {
+  //   ctx.beginPath();
+  //   for (var y = 0, j=0; j < columns; y+=44, j++) {
+  //     ctx.rect (x, y, 40, 40);
+  //   }
+  //   color = (color == "red" ? "blue" : "red");
+  //   ctx.fillStyle = color;
+  //   ctx.fill();
+  //   ctx.closePath();
+  // }
+  // ctx.restore();
 
   // store the generate map as this image texture
   this.image = new Image();

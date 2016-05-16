@@ -48,9 +48,11 @@
 	var Map = __webpack_require__(2);
 	var Player = __webpack_require__(3);
 	var Rectangle = __webpack_require__(4);
+	var Platform = __webpack_require__(6);
 	
 	window.Game = {};
 	Game.Camera = Camera;
+	Game.Platform = Platform;
 	Game.Map = Map;
 	Game.Player = Player;
 	Game.Rectangle = Rectangle;
@@ -58,7 +60,7 @@
 	
 	// Game Script
 	(function(){
-	  // prepaire our game canvas
+	  // prepare game canvas
 	  var canvas = document.getElementById("canvas");
 	  var context = canvas.getContext("2d");
 	
@@ -84,10 +86,23 @@
 	
 	  // setup player
 	  var player = new Game.Player(50, room.height - 25);
+	  window.player = player;
 	
 	  // setup the magic camera !!!
 	  var camera = new Game.Camera(0, 0, canvas.width, canvas.height, room.width, room.height);
 	  camera.follow(player, canvas.width/2, canvas.height/2);
+	
+	  var platforms = [new Game.Platform(300, room.height - 20),
+	                   new Game.Platform(450, room.height - 100),
+	                   new Game.Platform(600, room.height - 190),
+	                   new Game.Platform(750, room.height - 280),
+	                   new Game.Platform(900, room.height - 370),
+	                   new Game.Platform(750, room.height - 460),
+	                   new Game.Platform(600, room.height - 550),
+	                   new Game.Platform(450, room.height - 640),
+	                   new Game.Platform(300, room.height - 730),
+	
+	                 ];
 	
 	  // Collision colCheck
 	  var colCheck = function(shapeA, shapeB) {
@@ -119,28 +134,33 @@
 	          }
 	      }
 	      return colDir;
-	  }
+	  };
 	
 	  // Game update function
 	  var update = function(){
 	    // collision check on player
-	    // var dir = colCheck(this, Game.Rectangle);
-	    // if (dir === "l" || dir === "r") {
-	    //   this.velX = 0;
-	    //   this.jumping = false;
-	    // } else if (dir === "b") {
-	    //   this.grounded = true;
-	    //   this.jumping = false;
-	    // } else if (dir === "t") {
-	    //   this.velY *= -1;
-	    // }
-	    if (player.y === room.height - (player.height / 2)) {
-	      player.grounded = true;
-	      player.jumping = false;
-	    }
+	    player.grounded = false;
+	    platforms.forEach(function(platform) {
+	      var dir = colCheck(player, platform);
+	
+	      if (dir === "l" || dir === "r") {
+	        player.velX = 0;
+	        // player.jumping = false;
+	      } else if (dir === "b") {
+	        player.grounded = true;
+	        player.jumping = false;
+	      } else if (dir === "t") {
+	        player.velY *= -1;
+	      }
+	      if (player.y === room.height - (player.height / 2)) {
+	        player.grounded = true;
+	        player.jumping = false;
+	      }
+	    });
+	
 	    player.update(STEP, room.width, room.height);
 	    camera.update();
-	  }
+	  };
 	
 	  // Game draw function
 	  var draw = function(){
@@ -150,13 +170,18 @@
 	    // redraw all objects
 	    room.map.draw(context, camera.xView, camera.yView);
 	    player.draw(context, camera.xView, camera.yView);
-	  }
+	
+	    // redraw all platforms
+	    platforms.forEach(function(platform) {
+	      platform.draw(context, camera.xView, camera.yView);
+	    });
+	  };
 	
 	  // Game Loop
 	  var gameLoop = function(){
 	    update();
 	    draw();
-	  }
+	  };
 	
 	  // <-- configure play/pause capabilities:
 	
@@ -172,7 +197,7 @@
 	      }, INTERVAL);
 	      console.log("play");
 	    }
-	  }
+	  };
 	
 	  Game.togglePause = function(){
 	    if(runningId == -1){
@@ -184,7 +209,7 @@
 	      runningId = -1;
 	      console.log("paused");
 	    }
-	  }
+	  };
 	
 	  // -->
 	
@@ -208,7 +233,7 @@
 	    case 38: // up arrow
 	      Game.controls.up = true;
 	      break;
-	    case 32:
+	    case 32: //space
 	      Game.controls.up = true;
 	      break;
 	    case 39: // right arrow
@@ -249,7 +274,7 @@
 	// start the game when page is loaded
 	window.onload = function(){
 	  Game.play();
-	}
+	};
 
 
 /***/ },
@@ -355,8 +380,6 @@
 /* 2 */
 /***/ function(module, exports) {
 
-	
-	// wrapper for "class" Map
 	function Map(width, height){
 	  // map dimensions
 	  this.width = width;
@@ -364,6 +387,7 @@
 	
 	  // map texture
 	  this.image = null;
+	
 	}
 	
 	// generate an example of a large map
@@ -372,23 +396,23 @@
 	  ctx.canvas.width = this.width;
 	  ctx.canvas.height = this.height;
 	
-	  var rows = ~~(this.width/44) + 1;
-	  var columns = ~~(this.height/44) + 1;
-	
-	  var color = "red";
-	  ctx.save();
-	  ctx.fillStyle = "red";
-	  for (var x = 0, i = 0; i < rows; x+=44, i++) {
-	    ctx.beginPath();
-	    for (var y = 0, j=0; j < columns; y+=44, j++) {
-	      ctx.rect (x, y, 40, 40);
-	    }
-	    color = (color == "red" ? "blue" : "red");
-	    ctx.fillStyle = color;
-	    ctx.fill();
-	    ctx.closePath();
-	  }
-	  ctx.restore();
+	  // var rows = ~~(this.width/44) + 1;
+	  // var columns = ~~(this.height/44) + 1;
+	  //
+	  // var color = "red";
+	  // ctx.save();
+	  // ctx.fillStyle = "red";
+	  // for (var x = 0, i = 0; i < rows; x+=44, i++) {
+	  //   ctx.beginPath();
+	  //   for (var y = 0, j=0; j < columns; y+=44, j++) {
+	  //     ctx.rect (x, y, 40, 40);
+	  //   }
+	  //   color = (color == "red" ? "blue" : "red");
+	  //   ctx.fillStyle = color;
+	  //   ctx.fill();
+	  //   ctx.closePath();
+	  // }
+	  // ctx.restore();
 	
 	  // store the generate map as this image texture
 	  this.image = new Image();
@@ -442,76 +466,73 @@
 /* 3 */
 /***/ function(module, exports) {
 
+	function Player(x, y){
+	  // (x, y) = center of object
+	  // ATTENTION:
+	  // it represents the player position on the world(room), not the canvas position
+	  this.x = x;
+	  this.y = y;
 	
-	// wrapper for "class" Player
-	// module.exports = (function(){
-	  function Player(x, y){
-	    // (x, y) = center of object
-	    // ATTENTION:
-	    // it represents the player position on the world(room), not the canvas position
-	    this.x = x;
-	    this.y = y;
+	  // move speed in pixels per second
+	  this.velX = 0;
+	  this.velY = 0;
 	
-	    // move speed in pixels per second
-	    this.velX = 0;
-	    this.velY = 0;
+	  // render properties
+	  this.width = 40;
+	  this.height = 50;
+	  this.jumping = false;
+	  this.grounded = false;
+	}
 	
-	    // render properties
-	    this.width = 50;
-	    this.height = 50;
-	    this.jumping = false;
+	Player.prototype.update = function(step, worldWidth, worldHeight){
+	  // parameter step is the time between frames ( in seconds )
+	
+	  // check controls and move the player accordingly
+	  if(Game.controls.left) { this.velX = -200 * step; }
+	  if(Game.controls.up && this.grounded) {
+	    this.jumping = true;
 	    this.grounded = false;
+	    this.velY = - 400 * step;
+	    console.log(this.grounded);
 	  }
+	  if(Game.controls.right) { this.velX = 200 * step; }
+	  if(Game.controls.down) { this.y += this.velY * step; }
 	
-	  Player.prototype.update = function(step, worldWidth, worldHeight){
-	    // parameter step is the time between frames ( in seconds )
+	  //calculate velocities accounting for friction and gravity
+	  this.velX *= Game.FRICTION;
+	  this.velY += Game.GRAVITY;
 	
-	    // check controls and move the player accordingly
-	    if(Game.controls.left) { this.velX = -200 * step; }
-	    if(Game.controls.up && !this.jumping) {
-	      this.jumping = true;
-	      this.grounded = false;
-	      this.velY = - 400 * step;
-	      console.log(this.grounded);
-	    }
-	    if(Game.controls.right) { this.velX = 200 * step; }
-	    if(Game.controls.down) { this.y += this.velY * step; }
+	  if (this.grounded) {
+	    this.velY = 0;
+	  }
+	  // update players position as a function of its velocity
+	  this.x += this.velX;
+	  this.y += this.velY;
 	
-	    //calculate velocities accounting for friction and gravity
-	    this.velX *= Game.FRICTION;
-	    this.velY += Game.GRAVITY;
+	  // don't let player leaves the world's boundary
+	  if(this.x - this.width/2 < 0){
+	    this.x = this.width/2;
+	  }
+	  if(this.y - this.height/2 < 0){
+	    this.y = this.height/2;
+	  }
+	  if(this.x + this.width/2 > worldWidth){
+	    this.x = worldWidth - this.width/2;
+	  }
+	  if(this.y + this.height/2 > worldHeight){
+	    this.y = worldHeight - this.height/2;
+	  }
+	};
 	
-	    if (this.grounded) {
-	      this.velY = 0;
-	    }
-	    // update players position as a function of its velocity
-	    this.x += this.velX;
-	    this.y += this.velY;
+	Player.prototype.draw = function(context, xView, yView){
+	  // draw a simple rectangle shape as our player model
+	  context.save();
+	  context.fillStyle = "black";
+	  // before draw we need to convert player world's position to canvas position
+	  context.fillRect((this.x-this.width/2) - xView, (this.y-this.height/2) - yView, this.width, this.height);
+	  context.restore();
+	};
 	
-	    // don't let player leaves the world's boundary
-	    if(this.x - this.width/2 < 0){
-	      this.x = this.width/2;
-	    }
-	    if(this.y - this.height/2 < 0){
-	      this.y = this.height/2;
-	    }
-	    if(this.x + this.width/2 > worldWidth){
-	      this.x = worldWidth - this.width/2;
-	    }
-	    if(this.y + this.height/2 > worldHeight){
-	      this.y = worldHeight - this.height/2;
-	    }
-	  };
-	
-	  Player.prototype.draw = function(context, xView, yView){
-	    // draw a simple rectangle shape as our player model
-	    context.save();
-	    context.fillStyle = "black";
-	    // before draw we need to convert player world's position to canvas position
-	    context.fillRect((this.x-this.width/2) - xView, (this.y-this.height/2) - yView, this.width, this.height);
-	    context.restore();
-	  };
-	// })();
 	module.exports = Player;
 
 
@@ -519,41 +540,61 @@
 /* 4 */
 /***/ function(module, exports) {
 
-	// wrapper for "class" Rectangle
-	// module.exports = (function(){
-	  function Rectangle(left, top, width, height){
-	    this.left = left || 0;
-	    this.top = top || 0;
-	    this.width = width || 0;
-	    this.height = height || 0;
-	    this.right = this.left + this.width;
-	    this.bottom = this.top + this.height;
-	  }
+	function Rectangle(left, top, width, height){
+	  this.left = left || 0;
+	  this.top = top || 0;
+	  this.width = width || 0;
+	  this.height = height || 0;
+	  this.right = this.left + this.width;
+	  this.bottom = this.top + this.height;
+	}
 	
-	  Rectangle.prototype.set = function(left, top, /*optional*/width, /*optional*/height){
-	    this.left = left;
-	    this.top = top;
-	    this.width = width || this.width;
-	    this.height = height || this.height;
-	    this.right = (this.left + this.width);
-	    this.bottom = (this.top + this.height);
-	  };
+	Rectangle.prototype.set = function(left, top, /*optional*/width, /*optional*/height){
+	  this.left = left;
+	  this.top = top;
+	  this.width = width || this.width;
+	  this.height = height || this.height;
+	  this.right = (this.left + this.width);
+	  this.bottom = (this.top + this.height);
+	};
 	
-	  Rectangle.prototype.within = function(r) {
-	    return (r.left <= this.left &&
-	        r.right >= this.right &&
-	        r.top <= this.top &&
-	        r.bottom >= this.bottom);
-	  };
+	Rectangle.prototype.within = function(r) {
+	  return (r.left <= this.left &&
+	      r.right >= this.right &&
+	      r.top <= this.top &&
+	      r.bottom >= this.bottom);
+	};
 	
-	  Rectangle.prototype.overlaps = function(r) {
-	    return (this.left < r.right &&
-	        r.left < this.right &&
-	        this.top < r.bottom &&
-	        r.top < this.bottom);
-	  };
-	// })();
+	Rectangle.prototype.overlaps = function(r) {
+	  return (this.left < r.right &&
+	      r.left < this.right &&
+	      this.top < r.bottom &&
+	      r.top < this.bottom);
+	};
+	
 	module.exports = Rectangle;
+
+
+/***/ },
+/* 5 */,
+/* 6 */
+/***/ function(module, exports) {
+
+	function Platform(x, y){
+	  this.x = x;
+	  this.y = y;
+	  this.width = 50;
+	  this.height = 50;
+	}
+	
+	Platform.prototype.draw = function(context, xView, yView){
+	  context.save();
+	  context.fillStyle = "red";
+	  context.fillRect((this.x-this.width/2) - xView, (this.y-this.height/2) - yView, this.width, this.height);
+	  context.restore();
+	};
+	
+	module.exports = Platform;
 
 
 /***/ }

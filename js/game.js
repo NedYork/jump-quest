@@ -2,9 +2,11 @@ var Camera = require('./Camera.js');
 var Map = require('./Map.js');
 var Player = require('./Player.js');
 var Rectangle = require('./Rectangle.js');
+var Platform = require('./Platform.js');
 
 window.Game = {};
 Game.Camera = Camera;
+Game.Platform = Platform;
 Game.Map = Map;
 Game.Player = Player;
 Game.Rectangle = Rectangle;
@@ -12,7 +14,7 @@ Game.Rectangle = Rectangle;
 
 // Game Script
 (function(){
-  // prepaire our game canvas
+  // prepare game canvas
   var canvas = document.getElementById("canvas");
   var context = canvas.getContext("2d");
 
@@ -38,10 +40,23 @@ Game.Rectangle = Rectangle;
 
   // setup player
   var player = new Game.Player(50, room.height - 25);
+  window.player = player;
 
   // setup the magic camera !!!
   var camera = new Game.Camera(0, 0, canvas.width, canvas.height, room.width, room.height);
   camera.follow(player, canvas.width/2, canvas.height/2);
+
+  var platforms = [new Game.Platform(300, room.height - 20),
+                   new Game.Platform(450, room.height - 100),
+                   new Game.Platform(600, room.height - 190),
+                   new Game.Platform(750, room.height - 280),
+                   new Game.Platform(900, room.height - 370),
+                   new Game.Platform(750, room.height - 460),
+                   new Game.Platform(600, room.height - 550),
+                   new Game.Platform(450, room.height - 640),
+                   new Game.Platform(300, room.height - 730),
+
+                 ];
 
   // Collision colCheck
   var colCheck = function(shapeA, shapeB) {
@@ -73,28 +88,33 @@ Game.Rectangle = Rectangle;
           }
       }
       return colDir;
-  }
+  };
 
   // Game update function
   var update = function(){
     // collision check on player
-    // var dir = colCheck(this, Game.Rectangle);
-    // if (dir === "l" || dir === "r") {
-    //   this.velX = 0;
-    //   this.jumping = false;
-    // } else if (dir === "b") {
-    //   this.grounded = true;
-    //   this.jumping = false;
-    // } else if (dir === "t") {
-    //   this.velY *= -1;
-    // }
-    if (player.y === room.height - (player.height / 2)) {
-      player.grounded = true;
-      player.jumping = false;
-    }
+    player.grounded = false;
+    platforms.forEach(function(platform) {
+      var dir = colCheck(player, platform);
+
+      if (dir === "l" || dir === "r") {
+        player.velX = 0;
+        // player.jumping = false;
+      } else if (dir === "b") {
+        player.grounded = true;
+        player.jumping = false;
+      } else if (dir === "t") {
+        player.velY *= -1;
+      }
+      if (player.y === room.height - (player.height / 2)) {
+        player.grounded = true;
+        player.jumping = false;
+      }
+    });
+
     player.update(STEP, room.width, room.height);
     camera.update();
-  }
+  };
 
   // Game draw function
   var draw = function(){
@@ -104,13 +124,18 @@ Game.Rectangle = Rectangle;
     // redraw all objects
     room.map.draw(context, camera.xView, camera.yView);
     player.draw(context, camera.xView, camera.yView);
-  }
+
+    // redraw all platforms
+    platforms.forEach(function(platform) {
+      platform.draw(context, camera.xView, camera.yView);
+    });
+  };
 
   // Game Loop
   var gameLoop = function(){
     update();
     draw();
-  }
+  };
 
   // <-- configure play/pause capabilities:
 
@@ -126,7 +151,7 @@ Game.Rectangle = Rectangle;
       }, INTERVAL);
       console.log("play");
     }
-  }
+  };
 
   Game.togglePause = function(){
     if(runningId == -1){
@@ -138,7 +163,7 @@ Game.Rectangle = Rectangle;
       runningId = -1;
       console.log("paused");
     }
-  }
+  };
 
   // -->
 
@@ -162,7 +187,7 @@ window.addEventListener("keydown", function(e){
     case 38: // up arrow
       Game.controls.up = true;
       break;
-    case 32:
+    case 32: //space
       Game.controls.up = true;
       break;
     case 39: // right arrow
@@ -203,4 +228,4 @@ window.addEventListener("keyup", function(e){
 // start the game when page is loaded
 window.onload = function(){
   Game.play();
-}
+};
